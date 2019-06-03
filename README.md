@@ -17,7 +17,7 @@ Once finished, you can simply run the training with the following commands. It w
 
 ```
 output=out_waae
-for i in {1..1}
+for i in {1..5}
 do
     nmtpy train -C config/waae.conf \
     model.gradient_penality:10 \
