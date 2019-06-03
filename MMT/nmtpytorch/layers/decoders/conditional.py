@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -129,7 +130,7 @@ class ConditionalDecoder(nn.Module):
                     2048, activ='tanh')
 
 
-            if "adv" in self.loss_imagination:
+            if "wgan" in self.loss_imagination:
                 self.g_stats = []
                 self.d_stats = []
                 self.i_stats = []
@@ -139,14 +140,11 @@ class ConditionalDecoder(nn.Module):
                 self.discriminator = Discriminator_adv(self.hidden_size)
                 # self.optimizer_G = torch.optim.Adam(self.G.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
                 self.optimizer_D = torch.optim.Adam(self.discriminator.parameters(), lr=0.0002, betas=(0.5, 0.999))
-                if self.loss_imagination == "adv":
-                    self.adversarial_loss = torch.nn.BCEWithLogitsLoss()
-                if "adv_gp" in self.loss_imagination:
-                    self.gradient_penality = gradient_penality
-                    self.critic = critic
-                    print("gradient_penality",gradient_penality,"critic",critic)
-                    self.cur_g_loss = torch.Tensor([0])
-                    self.cur_d_loss = torch.Tensor([0])
+                self.gradient_penality = gradient_penality
+                self.critic = critic
+                print("gradient_penality",gradient_penality,"critic",critic)
+                self.cur_g_loss = torch.Tensor([0])
+                self.cur_d_loss = torch.Tensor([0])
 
 
             if "waae" in self.loss_imagination:
@@ -373,99 +371,7 @@ class ConditionalDecoder(nn.Module):
                     if self.ic % 30==0:
                         print("G_loss {:.3f} D_loss {:.3f}".format(float(g_loss.data), float(d_loss.data)))
 
-
-
-                if self.loss_imagination == "adv_gp1":
-
-                    Tensor = torch.cuda.FloatTensor
-                    cond = hs.mean(0)
-
-
-                    def compute_gradient_penalty(D, real_samples, fake_samples, cond):
-                        """Calculates the gradient penalty loss for WGAN GP"""
-                        # Random weight term for interpolation between real and fake samples
-                        alpha = Tensor(np.random.random((real_samples.size(0), 1)))
-                        # Get random interpolation between real and fake samples
-                        interpolates = alpha * real_samples + ((1 - alpha) * fake_samples)
-                        interpolates = Variable(torch.cat((interpolates,cond), dim=-1), requires_grad=True)
-                        d_interpolates = D(interpolates)
-                        fake = Variable(Tensor(real_samples.shape[0], 1).fill_(1.0), requires_grad=False)
-                        # Get gradient w.r.t. interpolates
-                        gradients = autograd.grad(
-                            outputs=d_interpolates,
-                            inputs=interpolates,
-                            grad_outputs=fake,
-                            create_graph=True,
-                            retain_graph=True,
-                            only_inputs=True,
-                        )[0]
-                        gradients = gradients.view(gradients.size(0), -1)
-                        gradient_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
-                        return gradient_penalty
-
-                    # ---------------------
-                    if self.training:
-                        self.optimizer_D.zero_grad()
-
-
-                    # Generate a batch of images
-                    z = Variable(Tensor(np.random.normal(0, 1, (cond.shape[0], 256))))
-                    g_input = torch.cat((cond, z), dim=-1)
-
-                    fake_imgs = self.generator(g_input).detach()
-
-                    # Real images
-                    d_input1 = torch.cat((image, cond.detach()), dim=-1)
-                    d_input2 = torch.cat((fake_imgs, cond.detach()), dim=-1)
-                    real_validity = self.discriminator(d_input1)
-                    fake_validity = self.discriminator(d_input2)
-
-                    # Gradient penalty
-                    gradient_penalty = 0
-                    if self.training:
-                        gradient_penalty = compute_gradient_penalty(self.discriminator, image.data, fake_imgs.data, cond.data)
-                    # Adversarial loss
-                    d_loss = gamma * (-torch.mean(real_validity) + torch.mean(fake_validity) + self.gradient_penality * gradient_penalty)
-
-
-                    if self.training:
-                        d_loss.backward()
-                        self.optimizer_D.step()
-
-
-                    self.ic += 1
-
-                    # Train the generator every n_critic steps
-                    if self.ic % self.critic == 0:
-
-                        # Sample noise as generator input
-                        g_input = torch.cat((cond, z), dim=-1)
-                        fake_imgs = self.generator(g_input)
-
-                        # Loss measures generator's ability to fool the discriminator
-                        # Train on fake images
-                        d_input2 = torch.cat((fake_imgs, cond), dim=-1)
-                        fake_validity = self.discriminator(d_input2)
-                        g_loss = gamma * (-torch.mean(fake_validity))
-                        loss += g_loss
-
-                    if self.ic % 30==0:
-                        print("G_loss {:.3f} D_loss {:.3f}".format(float(g_loss.data), float(d_loss.data)))
-                        self.i_stats.append(self.ic)
-                        self.g_stats.append(g_loss.data)
-                        self.d_stats.append(d_loss.data)
-
-                    if self.training:
-                        if self.cur_epoch != kwargs["ectr"]:
-                            self.cur_epoch = kwargs["ectr"]
-                            plt.plot(self.i_stats, self.g_stats, '-r', label='G_loss')
-                            plt.plot(self.i_stats, self.d_stats, '-b', label='D_loss')
-                            plt.legend()
-                            plt.savefig(os.path.join(kwargs["outdir"],'loss'+str(kwargs["seed"])+'.png'))
-                            plt.clf()
-                            pickle.dump([self.i_stats, self.g_stats, self.d_stats], open(os.path.join(kwargs["outdir"],'loss'+str(kwargs["seed"])+'.pkl'), 'wb+'))
-
-                if self.loss_imagination == "adv_gp2":
+                if self.loss_imagination == "wgan_gp":
 
                     Tensor = torch.cuda.FloatTensor
                     cond = hs.mean(0)
@@ -559,105 +465,7 @@ class ConditionalDecoder(nn.Module):
                             pickle.dump([self.i_stats, self.g_stats, self.d_stats], open(os.path.join(kwargs["outdir"],'loss'+str(kwargs["seed"])+'.pkl'), 'wb+'))
 
 
-                if self.loss_imagination == "adv_gp3":
 
-                    Tensor = torch.cuda.FloatTensor
-                    cond = hs.mean(0)
-                    self.ic += 1
-
-
-                    def compute_gradient_penalty(D, real_samples, fake_samples, cond):
-                        """Calculates the gradient penalty loss for WGAN GP"""
-                        # Random weight term for interpolation between real and fake samples
-                        alpha = Tensor(np.random.random((real_samples.size(0), 1)))
-                        # Get random interpolation between real and fake samples
-                        interpolates = alpha * real_samples + ((1 - alpha) * fake_samples)
-                        interpolates = Variable(torch.cat((interpolates,cond), dim=-1), requires_grad=True)
-                        d_interpolates = D(interpolates)
-                        fake = Variable(Tensor(real_samples.shape[0], 1).fill_(1.0), requires_grad=False)
-                        # Get gradient w.r.t. interpolates
-                        gradients = autograd.grad(
-                            outputs=d_interpolates,
-                            inputs=interpolates,
-                            grad_outputs=fake,
-                            create_graph=True,
-                            retain_graph=True,
-                            only_inputs=True,
-                        )[0]
-                        gradients = gradients.view(gradients.size(0), -1)
-                        gradient_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
-                        return gradient_penalty
-
-                    if (self.cur_d_loss < self.cur_g_loss)[0]:
-                        self.critic = 1
-                    else:
-                        self.critic = 5
-
-                    for _ in range(self.critic):
-
-                        cond_D = cond.detach()
-
-                        if self.training:
-                            self.optimizer_D.zero_grad()
-
-                        # Generate a batch of images
-                        z = Variable(Tensor(np.random.normal(0, 1, (cond.shape[0], 256))))
-                        g_input = torch.cat((cond_D, z), dim=-1)
-                        fake_imgs = self.generator(g_input).detach()
-
-                        # Real images
-                        d_input1 = torch.cat((image, cond_D), dim=-1)
-                        d_input2 = torch.cat((fake_imgs, cond_D), dim=-1)
-                        real_validity = self.discriminator(d_input1)
-                        fake_validity = self.discriminator(d_input2)
-
-                        # Gradient penalty
-                        gradient_penalty = 0
-                        if self.training:
-                            gradient_penalty = compute_gradient_penalty(self.discriminator, image.data, fake_imgs.data, cond.data)
-                        # Adversarial loss
-                        d_loss = gamma * (-torch.mean(real_validity) + torch.mean(fake_validity) + self.gradient_penality * gradient_penalty)
-                        self.cur_d_loss = d_loss.data
-
-                        if self.training:
-                            d_loss.backward(retain_graph=True)
-                            self.optimizer_D.step()
-
-
-                    # Sample noise as generator input
-                    self.generator.zero_grad()
-                    g_input = torch.cat((cond, z), dim=-1)
-                    fake_imgs = self.generator(g_input)
-
-                    # Loss measures generator's ability to fool the discriminator
-                    # Train on fake images
-                    d_input2 = torch.cat((fake_imgs, cond), dim=-1)
-                    fake_validity = self.discriminator(d_input2)
-                    g_loss = gamma * (-torch.mean(fake_validity))
-                    loss += g_loss
-
-
-                    #stats
-                    self.cur_g_loss = g_loss.data
-                    if self.ic % 30==0:
-                        print("G_loss {:.3f} D_loss {:.3f}".format(float(g_loss.data), float(d_loss.data)))
-                        self.i_stats.append(self.ic)
-                        self.g_stats.append(g_loss.data)
-                        self.d_stats.append(d_loss.data)
-
-
-
-                    if self.training:
-                        if self.cur_epoch != kwargs["ectr"]:
-                            self.cur_epoch = kwargs["ectr"]
-                            plt.plot(self.i_stats, self.g_stats, '-r', label='G_loss')
-                            plt.plot(self.i_stats, self.d_stats, '-b', label='D_loss')
-                            plt.legend()
-                            plt.savefig(os.path.join(kwargs["outdir"],'loss'+str(kwargs["seed"])+'.png'))
-                            plt.clf()
-                            pickle.dump([self.i_stats, self.g_stats, self.d_stats], open(os.path.join(kwargs["outdir"],'loss'+str(kwargs["seed"])+'.pkl'), 'wb+'))
-
-                #
                 if self.loss_imagination == "waae":
                     def compute_gradient_penalty(D, real_samples, fake_samples):
                         """Calculates the gradient penalty loss for WGAN GP"""
