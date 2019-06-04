@@ -39,6 +39,11 @@ done
 
 From this training, we can now perform inference. You can also download a pretrained model (the one used for the challenge submission) [here](https://www.dropbox.com/s/n0v49r93oz0x36q/ckpt_nips2019.zip?dl=1).
 
+```
+output=ckpt
+nmtpy translate $(ls ${output}/*.best.meteor.ckpt) -s val,test_2016_flickr,test_2017_flickr,test_2017_mscoco,test_2018_flickr -o ${output} -k 16
+```
+
 Results will be printed on screen. You should approximate these results:
 
 | Tables        | BLEU           | METEOR  |
