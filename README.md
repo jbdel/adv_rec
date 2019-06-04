@@ -2,9 +2,11 @@ This github repesitory replicates the results found in the paper :
 
 Visual grounding for multimodal tasks with adversarial feedback
 
-# MMT
+## MMT
 
 This section aims to replicate the G-WGAN results of MMT.
+
+### Data
 
 Create a 3.6 python environement.
 Download the data folder with the following [link](https://www.dropbox.com/s/11m17k30tg88oeo/data_nips2019.zip?dl=1) and place it in MMT/
@@ -15,10 +17,13 @@ Go to the MMT folder and type :
 python setup.py develop
 ```
 It will install the required libraries.
+
+### Training
+
 Once finished, you can simply run the training with the following commands. It will perfom 5 trainings and then evaluate on the different test-sets automatically with a beam-search of 16.
 
 ```
-output=out_wgan_gp
+output=ckpt
 for i in {1..5}
 do
     nmtpy train -C config/wgan_gp.conf \
@@ -29,8 +34,10 @@ do
     model.imagination_factor:0.2 \
     train.save_path:./${output}
 done
-nmtpy translate $(ls ${output}/pool_multi30k-en-de-bpe10k/*.best.meteor.ckpt) -s val,test_2016_flickr,test_2017_flickr,test_2017_mscoco,test_2018_flickr -o ${output} -k 16
 ```
+### Inference
+
+From this training, we can now perform inference. You can also download a pretrained model (the one used for the challenge submission) [here](https://www.dropbox.com/s/n0v49r93oz0x36q/ckpt_nips2019.zip?dl=1).
 
 Results will be printed on screen. You should approximate these results:
 
