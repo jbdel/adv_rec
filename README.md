@@ -20,7 +20,7 @@ It will install the required libraries.
 
 ### Training
 
-Once finished, you can simply run the training with the following commands. It will perfom 5 trainings and then evaluate on the different test-sets automatically with a beam-search of 16.
+Once finished, you can simply run the training with the following commands. It will perfom 5 trainings with the mentionned parameters:
 
 ```
 output=ckpt
@@ -38,6 +38,8 @@ done
 ### Inference
 
 From this training, we can now perform inference. You can also download a pretrained model (the one used for the challenge submission) [here](https://www.dropbox.com/s/n0v49r93oz0x36q/ckpt_nips2019.zip?dl=1).
+
+We can evaluate on the different test-sets automatically with a beam-search of 16:
 
 ```
 output=ckpt
