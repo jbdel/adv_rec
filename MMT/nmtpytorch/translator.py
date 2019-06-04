@@ -39,6 +39,11 @@ class Translator(object):
             weights, _, opts = load_pt_file(model_file)
             opts = Options.from_dict(opts)
 
+            #ensure checkpoints are compatible everywhere
+            opts.make_abs()
+            #ensure we are doing right direction
+            opts["model"]["direction"]="en:Text,image:Numpy -> de:Text"
+
             if 'att_temp' not in opts.model:
                 logger.info("INFO: Model does not support 'att_temp'")
             else:

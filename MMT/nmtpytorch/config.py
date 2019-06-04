@@ -135,6 +135,21 @@ class Options(object):
 
             setattr(self, section, opts)
 
+    def make_abs(self):
+        for section in self.sections:
+            opts = getattr(self, section)
+            for key, value in opts.items():
+                if isinstance(value, dict):
+                    for k, v in value.items():
+                        if "data" in str(value):
+                            # print(section, key, k)
+                            opts[key][k] = pathlib.Path.cwd() / "data" / str(v).split("/data/")[1]
+                            # print(pathlib.Path.cwd() / "data" / str(v).split("/data/")[1])
+                else:
+                    if "data" in str(value) and len(str(value).split("/data/")) > 1:
+                        opts[key] = pathlib.Path.cwd() / "data" / str(value).split("/data/")[1]
+
+
     def __repr__(self):
         s = ""
         for section in self.sections:
