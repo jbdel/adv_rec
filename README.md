@@ -66,19 +66,18 @@ This section aims to evaluate the G-WGAN results of VQA.
 
 ### Requirements
 
-Create a 3.6 python environement.
-Requirements:
-torch==1.0.1
-torchvision==0.2.2
-numpy
-pillow
+Python3.6<br/>
+torch==1.0.1<br/>
+torchvision==0.2.2<br/>
+numpy<br/>
+pillow<br/>
 h5py
 
 ### Data
-Create a dir name data and ckpt.
-Download the [VQA data](https://www.dropbox.com/s/xt6k7aade4o4xrb/data_emnlp2019.zip?dl=1) and place it in the data folder.
-Download the [visual features](https://www.dropbox.com/s/tgogx7sp90o0dup/model_0.6379.pth.zip?dl=1) and place it in data.
-Download the [pretrained model checkpoint](https://www.dropbox.com/s/tgogx7sp90o0dup/model_0.6379.pth.zip?dl=1) and place it in ckpt.
+Create a dir name data and ckpt.<br/>
+Download the [VQA data](https://www.dropbox.com/s/xt6k7aade4o4xrb/data_emnlp2019.zip?dl=1) and place it in the data folder.<br/>
+Download the [visual features](https://www.dropbox.com/s/tgogx7sp90o0dup/model_0.6379.pth.zip?dl=1) and place it in data.<br/>
+Download the [pretrained model checkpoint](https://www.dropbox.com/s/tgogx7sp90o0dup/model_0.6379.pth.zip?dl=1) and place it in ckpt.<br/>
  
 ### Inference
 
@@ -96,7 +95,7 @@ python main.py  \
 --ckpt $(basename $output/model* .pth)
 ```
 
-You should get an accuracy of 63.79%.
+You should get an accuracy of 63.79%.<br/>
 The whole adversarial implementation is available [here](https://github.com/anon0001/adv_rec/blob/master/VQA/adversarial.py)
 
 
