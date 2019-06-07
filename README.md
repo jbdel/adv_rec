@@ -76,7 +76,7 @@ h5py
 ### Data
 Create a dir name data and ckpt.<br/>
 Download the [VQA data](https://www.dropbox.com/s/xt6k7aade4o4xrb/data_emnlp2019.zip?dl=1) and place it in the data folder.<br/>
-Download the [visual features](https://www.dropbox.com/s/tgogx7sp90o0dup/model_0.6379.pth.zip?dl=1) and place it in data.<br/>
+Download the [visual features](https://www.dropbox.com/s/v0lam4928w3nbbe/val36.zip?dl=1) and place it in data.<br/>
 Download the [pretrained model checkpoint](https://www.dropbox.com/s/tgogx7sp90o0dup/model_0.6379.pth.zip?dl=1) and place it in ckpt.<br/>
  
 ### Inference
