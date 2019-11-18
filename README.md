@@ -1,3 +1,14 @@
+<pre>@misc{delbrouck2019adversarial,
+    title={Adversarial reconstruction for Multi-modal Machine Translation},
+    author={Jean-Benoit Delbrouck and Stéphane Dupont},
+    year={2019},
+    eprint={1910.02766},
+    archivePrefix={arXiv},
+    primaryClass={cs.CL}
+}
+    </pre>
+
+
 This github repesitory replicates the results found in the paper :
 
 Visual grounding for multimodal tasks with adversarial feedback
